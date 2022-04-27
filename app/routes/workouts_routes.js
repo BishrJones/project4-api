@@ -58,3 +58,14 @@ router.get('/workouts/user/:ownerId', (req, res, next)=>{
         })
         .catch(next)
 })
+
+// SHOW ROUTE -> GET workout by id
+router.get('/workouts/:id', (req, res, next) => {
+    // we get the id from req.params.id -> :id
+    Workout.findById(req.params.id)
+        .then(handle404)
+        // if its successful, respond with an object as json
+        .then(workout => res.status(200).json({ workout: workout.toObject() }))
+        // otherwise pass to error handler
+        .catch(next)
+})
