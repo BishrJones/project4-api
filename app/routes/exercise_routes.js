@@ -37,3 +37,21 @@ router.post('/exercise/:workoutId', requireToken, (req, res, next)=>{
     //catch errors and send to the handler
         .catch(next)
 })
+
+// PATCH ROUTE -> update the individual exercise
+router.patch('/exercise/:workoutId/:exerciseId', requireToken, removeBlanks, (req, res, next)=>{
+    const exerciseId = req.params.exerciseId
+    const workoutId = req.params.workoutId
+
+    Workout.findById(workoutId)
+        .then(handle404)
+        .then(workout => {
+            const theExercise = workout.exercise.id(exerciseId)
+            console.log('this is the original exercise')
+            requireOwnership(req, workout)
+            theExercise.set(req.body.exercise)
+            return workout.save()
+        })
+        .then(()=> res.sendStatus(204))
+        .catch(next)
+})
