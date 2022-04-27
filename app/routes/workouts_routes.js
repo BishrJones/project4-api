@@ -69,3 +69,35 @@ router.get('/workouts/:id', (req, res, next) => {
         // otherwise pass to error handler
         .catch(next)
 })
+
+// CREATE ROUTE ->  POST route to make workouts
+router.post('/workouts', requireToken, (req, res, next)=>{
+    //we brought in requreToken so we can have access to req.user
+    req.body.workout.owner = req.user.id
+    Workout.create(req.body.workout)
+        .then(workout =>{
+            //send a successful response like this
+            res.status(201).json({ workout: workout.toObject() })
+        })
+        //if an error occurs pass it to the error handler
+        .catch(next)
+})
+
+// UPDATE ROUTE -> PATCH  route for workout by id
+router.patch('/workouts/:id', requireToken, removeBlanks, (req, res, next)=>{
+    //if the client attempts to change the owner of the workout we can disallow that from the get go
+    delete req.body.owner
+    //then find workout by id
+    Workout.findById(req.params.id)
+    //handle 404
+    .then(handle404)
+    //require ownership and update workout
+    .then(workout =>{
+        requireOwnership(req, workout)
+        return workout.updateOne(req.body.workout)
+    })
+    //send a 204 no content if successful 
+    .then(()=>res.sendStatus(204))
+    //pass to errorhandler if not successful
+    .catch(next)
+})
