@@ -101,3 +101,25 @@ router.patch('/workouts/:id', requireToken, removeBlanks, (req, res, next)=>{
     //pass to errorhandler if not successful
     .catch(next)
 })
+
+// DELETE/REMOVE ROUTE -> delete the workout by id
+router.delete('/workouts/:id', requireToken, (req, res, next) =>{
+    //find the workout by id
+    Workout.findById(req.params.id)
+        .then(handle404)
+        .then(workout => {
+            //requireOwnership needs two arguments
+            //these are the request itself and the document itself
+            requireOwnership(req, workout)
+            //we'll delete if the middleware doesn't throw an error
+            workout.deleteOne()
+        })
+        .then(()=>res.sendStatus(204))
+    //first handle the 404 if any
+    //use requireownership middleware to make sure the right person is making the request
+    //send back a 204 no content status if error occurs
+    //if error occurs, pass to the handler
+        .catch(next)
+})
+
+module.exports = router
