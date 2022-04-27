@@ -1,0 +1,21 @@
+const mongoose = require('mongoose')
+const { Schema, model } = mongoose
+
+const commentSchema = new mongoose.Schema(
+	{
+		note: {
+			type: String,
+			required: true,
+		},
+		owner: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'User',
+			required: true,
+		},
+	},
+	{
+		timestamps: true,
+	}
+)
+
+module.exports = commentSchema
