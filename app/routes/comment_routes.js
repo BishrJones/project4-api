@@ -34,3 +34,32 @@ router.post('/comments/:workoutId', requireToken, (req,res, next) => {
     //catch errors and send to the handler
         .catch(next)
 })
+
+// DELETE/REMOVE route -> deletes the comment
+router.delete('/comments/:workoutId/:commId', requireToken, (req,res, next) => {
+    // saving both ids to variables for easy ref later
+    const commId = req.params.commId
+    const workoutId = req.params.workoutId
+    // find the pet in the db
+    Workout.findById(workoutId)
+       .populate('comments.owner')
+        // if pet not found throw 404
+        .then(handle404)
+        .then(workout => {
+            // get the specific subdocument by its id
+            const theComment = workout.comments.id(commId)
+            console.log('this is the comment', theComment)
+            // require that the deleter is the owner of the comment
+            requireOwnership(req, theComment)
+            // call remove on the toy we got on the line above requireOwnership
+            theComment.remove()
+
+            // return the saved pet
+            return workout.save()
+        })
+        // send 204 no content
+        .then(() => res.sendStatus(204))
+        .catch(next)
+})
+
+module.exports = router
