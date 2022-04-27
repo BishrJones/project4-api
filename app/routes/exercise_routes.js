@@ -55,3 +55,28 @@ router.patch('/exercise/:workoutId/:exerciseId', requireToken, removeBlanks, (re
         .then(()=> res.sendStatus(204))
         .catch(next)
 })
+
+// DELETE ROUTE -> this route will delete the exercise 
+router.delete('/exercise/:workoutId/:exerciseId', requireToken, (req, res, next)=>{
+    const exerciseId = req.params.exerciseId
+    const workoutId = req.params.workoutId
+    //find the workout in the database
+    Workout.findById(workoutId)
+        //if workout not found 404
+        .then(handle404)
+        .then(workout => {
+            //get the subdocument by its id
+            const theExercise =  workout.exercise.id(exerciseId)
+            //require that the deleter is the owner of the workout
+            requireOwnership(req, workout)
+            //call remove on the exercise we got on the line above requireOwnership
+            theExercise.remove()
+            //return the saved workout
+            return workout.save()
+        })
+        //send 204 no content
+        .then(() => res.sendStatus(204))
+        .catch(next)
+})
+
+module.exports = router
