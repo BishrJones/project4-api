@@ -15,3 +15,5 @@ const exerciseSchema = new mongoose.Schema (
     }
     }
 )
+
+module.exports = exerciseSchema
